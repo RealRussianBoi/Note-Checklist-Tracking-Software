@@ -1,35 +1,36 @@
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('./notes.sqlite');
 
-// ===== USER TABLE =====
-// (Weak: no email uniqueness, no password hashing, no validation)
-db.run(`
-  CREATE TABLE IF NOT EXISTS user (
-    id INTEGER PRIMARY KEY,
-    username TEXT,
-    email TEXT,
-    password TEXT
-  )
-`);
+db.run(`PRAGMA foreign_keys = ON`);
 
 // ===== NOTES TABLE =====
-// (Weak: no foreign key to user, no indexing, plain text content)
 db.run(`
   CREATE TABLE IF NOT EXISTS notes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT,
+    title TEXT NOT NULL,
     content TEXT,
-    created_at TEXT
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
   )
 `);
 
 // ===== CHECKLIST TABLE =====
-// (Weak: no relational integrity, items stored as text)
 db.run(`
   CREATE TABLE IF NOT EXISTS checklist (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
-    items TEXT
+    name TEXT NOT NULL,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+// ===== CHECKLIST ITEMS TABLE =====
+db.run(`
+  CREATE TABLE IF NOT EXISTS checklist_item (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    checklist_id INTEGER NOT NULL,
+    content TEXT NOT NULL,
+    checked INTEGER DEFAULT 0,
+    FOREIGN KEY (checklist_id) REFERENCES checklist(id) ON DELETE CASCADE
   )
 `);
 

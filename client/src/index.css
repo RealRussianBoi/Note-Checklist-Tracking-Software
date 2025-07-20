@@ -54,6 +54,32 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+/* Shrinks pages on larger screens */
+.universal-page-styles {
+  width: 100%;
+  height: 100%;
+}
+
+/* Shrinks pages on larger screens */
+.page-responsive-width {
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Responsive width */
+@media (min-width: 1024px) {
+  .page-responsive-width {
+    width: 80%;
+  }
+}
+
+@media (min-width: 1280px) {
+  .page-responsive-width {
+    width: 60%;
+  }
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

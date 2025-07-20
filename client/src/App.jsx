@@ -1,19 +1,38 @@
 // General Use Imports
-import { useState } from 'react'
 import './App.css'
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom'
+import './index.css'
+import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom'
 
-// Custom Imports
-import Homepage from './Pages/Homepage'
+// Custom Page Imports
+import Homepage from './Pages/Default/Homepage'
+import UnkownURL from './Pages/Default/UnkownURL'
+
+//Custom Component Imports
+import UpperNavBar from './Components/UpperNavBar'
+import ManageNotes from './Pages/Notes/ManageNotes'
 
 function App() {
   return (
     <Router>
-      <div>
-      <Routes>
-        <Route path="/home" element={<Homepage />} />
-      </Routes>
+      <UpperNavBar />
+      <div 
+        className='page-responsive-width' 
+        style={{
+          height: 'calc(100vh - 60px)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <Routes>
+          <Route path="/home" element={ <Homepage />} />
+          <Route path="/notes/add" element={ <ManageNotes />} />
+
+          {/* Redirects all unknown URL's to this page. */}
+          <Route path="*" element={ <UnkownURL />} />
+        </Routes>
       </div>
+
     </Router>
   )
 }
