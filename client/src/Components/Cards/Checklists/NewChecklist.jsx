@@ -1,8 +1,13 @@
+//General Use Imports
+import PropTypes from "prop-types";
+
 //MUI Imports
 import { Card, Typography, Box, CardActionArea } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 
-function NewChecklist() {
+function NewChecklist({
+  onClick
+}) {
   return (
     <Card
       sx={{
@@ -13,8 +18,8 @@ function NewChecklist() {
         justifyContent: "center",
         alignItems: "center",
         cursor: "pointer",
-        border: "2px dashed #1976d2",
-        color: "#1976d2",
+        border: "2px dashed #9aa615ff",
+        color: "#acb414ff",
         "&:hover": {
           backgroundColor: "#f0f8ff",
         },
@@ -28,7 +33,7 @@ function NewChecklist() {
           flexDirection: 'column',
           justifyContent: 'center'
         }}
-        onClick={() => {window.location.href='/checklists/add'}}
+        onClick={() => {onClick()}}
       >
         <AddIcon sx={{ fontSize: 48 }} />
         <Typography variant="subtitle1" fontWeight="bold" textAlign={'center'}>
@@ -38,5 +43,9 @@ function NewChecklist() {
     </Card>
   );
 }
+
+NewChecklist.propTypes = {
+  onClick: PropTypes.func.isRequired,
+};
 
 export default NewChecklist;

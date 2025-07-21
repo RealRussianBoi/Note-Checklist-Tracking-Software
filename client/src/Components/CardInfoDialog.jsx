@@ -14,6 +14,7 @@ import {
 
 function CardInfoDialog({
   open,
+  type,
   onClose,
   created_at,
   updated_at,
@@ -26,6 +27,9 @@ function CardInfoDialog({
 
       <DialogContent dividers>
         <Stack spacing={2}>
+          <Typography variant="body1">
+            <strong>Type:</strong> {type.charAt(0).toUpperCase() + type.slice(1)}
+          </Typography>
           <Typography variant="body1"><strong>Title:</strong> {title}</Typography>
           <Typography variant="body1">
             <strong>Created At:</strong>{" "}
@@ -49,6 +53,7 @@ function CardInfoDialog({
 
 CardInfoDialog.propTypes = {
   open: PropTypes.bool.isRequired,
+  type: PropTypes.string.isRequired,
   onClose: PropTypes.func.isRequired,
   created_at: PropTypes.string.isRequired,
   updated_at: PropTypes.string,

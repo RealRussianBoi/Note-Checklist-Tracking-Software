@@ -8,6 +8,8 @@ import EmptyCard from '../../Components/Cards/EmptyCard';
 import LoadingAndFinalizationAlert from '../../Components/LoadingAndFinalizationAlert';
 import NoteCard from '../../Components/Cards/Notes/NoteCard'
 import CardInfoDialog from '../../Components/CardInfoDialog';
+import ChecklistDialog from '../../Components/ChecklistDialog';
+import ChecklistCard from '../../Components/Cards/Checklists/ChecklistCard';
 
 function Homepage() {
     const [finalizationController, setFinalizationController] = useState({
@@ -22,20 +24,10 @@ function Homepage() {
         open: false,
         data: null,
     });
-
-    const handleInfoClick = (noteData) => { //Opens the CardInfoDialog component.
-        setInfoDialog({
-            open: true,
-            data: noteData,
-        });
-    };
-
-    const handleCloseDialog = () => { //Closes the CardInfoDialog component.
-        setInfoDialog({
-            open: false,
-            data: null,
-        });
-    };
+    const [checklistDialog, setChecklistDialog] = useState({
+        open: false,
+        content: null,
+    });
 
     useEffect(() => { //Fetches notes and checklists to populate Homepage.
         const fetchData = async () => {
@@ -48,8 +40,6 @@ function Homepage() {
                 }
 
                 setData(data.data);
-                console.log(data.data);
-                
                 setFinalizationController((prev) => ({...prev, visible: false, disableFields: false, }));
             } catch (error) {
                 setFinalizationController({
@@ -68,12 +58,30 @@ function Homepage() {
         }, 500);
     }, []);
 
+    const handleInfoClick = (noteData) => { //Opens the CardInfoDialog component.
+        setInfoDialog({
+            open: true,
+            data: noteData,
+        });
+    };
+
+    const handleCloseDialog = () => { //Closes the CardInfoDialog component.
+        setInfoDialog({
+            open: false,
+            data: null,
+        });
+    };
+
+    const acceptNewCard = (card) => { //Inserts a new card into the array of cards.
+        setData((p) => ({...card, ...p}));
+    };
+
     const renderCards = () => { //Populates Homepage with Cards for Note & Checklists.
         
         if (data.length === 0) {
             return (
                 <EmptyCard/>
-            )
+            );
         }
 
         return data.map((d) => {
@@ -81,15 +89,37 @@ function Homepage() {
             return d.type === "note" ? (
                 <NoteCard
                     key={key}
-                    content={d.content}
                     created_at={d.created_at}
                     id={d.id}
                     title={d.title}
                     onInfoClick={() => handleInfoClick(d)}
                 />
             ) : (
-                <EmptyCard/>
+                <ChecklistCard
+                    key={key}
+                    id={d.id}
+                    title={d.title}
+                    created_at={d.created_at}
+                    updated_at={d.updated_at}
+                    items={d.items}
+                    onInfoClick={() => handleInfoClick(d)}
+                    onClick={openEditChecklist} // <<< Important!
+                />
             );
+        });
+    };
+
+    const openNewChecklist = () => { //Opens a new checklist, displaying its items.
+        setChecklistDialog({
+            open: true,
+            content: null,
+        });
+    };
+
+    const openEditChecklist = (checklistData) => { //Opens a checklist for editing.
+        setChecklistDialog({
+            open: true,
+            content: checklistData,
         });
     };
 
@@ -117,12 +147,20 @@ function Homepage() {
                 <CardInfoDialog
                     open={infoDialog.open}
                     onClose={handleCloseDialog}
+                    type={infoDialog.data.type}
                     created_at={infoDialog.data.created_at}
                     updated_at={infoDialog.data.updated_at}
                     id={infoDialog.data.id}
                     title={infoDialog.data.title}
                 />
             )}
+
+            <ChecklistDialog
+                open={checklistDialog.open}
+                content={checklistDialog.content}
+                onClose={() => setChecklistDialog({ open: false, content: null })}
+                onSubmit={(items) => console.log("Submitted:", items)}
+            />
 
             <div
                 style={{
@@ -134,7 +172,7 @@ function Homepage() {
                 }}
             >
                 <NewNote/>
-                <NewChecklist/>
+                <NewChecklist onClick={openNewChecklist}/>
                 {renderCards()}
             </div>
         </div>

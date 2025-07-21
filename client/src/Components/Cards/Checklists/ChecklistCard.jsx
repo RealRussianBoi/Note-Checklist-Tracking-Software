@@ -3,31 +3,35 @@ import PropTypes from "prop-types";
 
 // MUI Imports
 import {
-  Card,
-  Typography,
-  CardContent,
-  CardActions,
-  CardHeader,
-  IconButton,
+    Card,
+    Typography,
+    CardContent,
+    CardActions,
+    CardHeader,
+    IconButton,
+    Box,
 } from "@mui/material";
 import InfoIcon from '@mui/icons-material/Info';
-import NotesIcon from '@mui/icons-material/TextSnippet';
+import ChecklistIcon from '@mui/icons-material/Checklist';
 
-function NoteCard({
-  created_at,
-  id,
-  title,
-  onInfoClick,
+function ChecklistCard({
+    created_at,
+    updated_at,
+    id,
+    title,
+    items,
+    onInfoClick,
+    onClick,
 }) {
   return (
     <Card
-      onClick={() => {window.location.href=`/notes/edit?id=${id}`}}
+      onClick={() => onClick({ id, title, items, created_at, updated_at, type: 'checklist' })}
       sx={{
         width: 250,
         height: 180,
         cursor: "pointer",
-        border: "2px solid #1976d2",
-        color: "#1976d2",
+        border: "2px solid #9aa615ff",
+        color: "#acb414ff",
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
@@ -45,9 +49,9 @@ function NoteCard({
           paddingBottom: 0,
         }}
         avatar={
-          <NotesIcon sx={{ fontSize: 36, color: "#1976d2" }} />
+          <ChecklistIcon sx={{ fontSize: 36, color: "#acb414ff" }} />
         }
-        title={<><Typography variant="subtitle2">Type: Note</Typography></>}
+        title={<><Typography variant="subtitle2">Type: Checklist</Typography></>}
       />
 
       {/* Title Content */}
@@ -101,11 +105,18 @@ function NoteCard({
   );
 }
 
-NoteCard.propTypes = {
+ChecklistCard.propTypes = {
   created_at: PropTypes.string.isRequired,
+  updated_at: PropTypes.string.isRequired,
   id: PropTypes.number.isRequired,
   title: PropTypes.string.isRequired,
+  items: PropTypes.arrayOf(PropTypes.shape({
+    text: PropTypes.string,
+    checked: PropTypes.bool,
+  })).isRequired,
   onInfoClick: PropTypes.func.isRequired,
+  onClick: PropTypes.func.isRequired,
 };
 
-export default NoteCard;
+
+export default ChecklistCard;

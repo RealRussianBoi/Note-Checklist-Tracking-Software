@@ -179,14 +179,12 @@ function ManageNotes({ pageType = "Add" }) {
 
     const submission = async () => {
       try {
-        setFinalDialog(
-          {
-            ...finalDialog, 
-            open: true, 
-            severity: 'info', 
-            loadingText: `Saving Notes...`,
-          }
-        );
+        setFinalDialog({
+          ...finalDialog, 
+          open: true, 
+          severity: 'info', 
+          loadingText: `Saving Notes...`,
+        });
         
         const response = await fetch(`http://localhost:5000/notes/${pageType.toLowerCase()}`, {
           method: 'POST',
