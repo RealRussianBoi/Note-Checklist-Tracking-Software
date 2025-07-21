@@ -11,6 +11,7 @@ import {
   IconButton,
 } from "@mui/material";
 import InfoIcon from '@mui/icons-material/Info';
+import DeleteIcon from '@mui/icons-material/Delete';
 import NotesIcon from '@mui/icons-material/TextSnippet';
 
 function NoteCard({
@@ -18,6 +19,7 @@ function NoteCard({
   id,
   title,
   onInfoClick,
+  onDeleteClick,
 }) {
   return (
     <Card
@@ -30,12 +32,28 @@ function NoteCard({
         color: "#1976d2",
         display: "flex",
         flexDirection: "column",
+        position: 'relative', // for positioning the trash icon
         justifyContent: "space-between",
         "&:hover": {
           backgroundColor: "#f0f8ff",
         },
       }}
     >
+      <IconButton
+        onClick={(e) => {
+          e.stopPropagation();
+          onDeleteClick(id);
+        }}
+        sx={{
+          position: 'absolute',
+          top: 4,
+          right: 4,
+          zIndex: 1,
+        }}
+      >
+        <DeleteIcon />
+      </IconButton>
+
       {/* Centered Notes Icon */}
       <CardHeader
         sx={{
@@ -106,6 +124,7 @@ NoteCard.propTypes = {
   id: PropTypes.number.isRequired,
   title: PropTypes.string.isRequired,
   onInfoClick: PropTypes.func.isRequired,
+  onDeleteClick: PropTypes.func.isRequired,
 };
 
 export default NoteCard;

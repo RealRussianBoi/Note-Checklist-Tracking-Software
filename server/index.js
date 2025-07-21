@@ -84,6 +84,15 @@ app.post('/notes/edit', (req, res) => {
   });
 });
 
+//Deletes existing note.
+app.delete('/notes/delete/:id', (req, res) => {
+  const id = req.params.id;
+  db.run('DELETE FROM notes WHERE id = ?', [id], function(err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
+  });
+});
+
 //#Checklist Section Start
 
 //Gets all checklists with its associated data.
@@ -106,7 +115,7 @@ app.get('/checklists/get', (req, res) => {
   });
 });
 
-// Adds a new checklist and its items
+// Adds a new checklist and its items.
 app.post('/checklists/add', (req, res) => {
   const { title, items } = req.body;
 
@@ -160,7 +169,7 @@ app.post('/checklists/add', (req, res) => {
   });
 });
 
-// Edits an existing checklist and its items
+// Edits an existing checklist and its items.
 app.post('/checklists/edit', (req, res) => {
   const { id, title, items } = req.body;
 
@@ -208,6 +217,15 @@ app.post('/checklists/edit', (req, res) => {
         res.status(200).json({ message: 'Checklist updated successfully.' });
       });
     });
+  });
+});
+
+//Deletes an existing checklist.
+app.delete('/checklists/delete/:id', (req, res) => {
+  const id = req.params.id;
+  db.run('DELETE FROM checklist WHERE id = ?', [id], function(err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
   });
 });
 

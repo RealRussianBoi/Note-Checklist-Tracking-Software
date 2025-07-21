@@ -72,8 +72,14 @@ function Homepage() {
         });
     };
 
-    const acceptNewCard = (card) => { //Inserts a new card into the array of cards.
-        setData((p) => ({...card, ...p}));
+    const handleDeleteNote = async (id) => { //Deletes note from Database.
+        await fetch(`http://localhost:5000/notes/delete/${id}`, { method: 'DELETE' });
+    setData(prev => prev.filter(item => !(item.type === 'note' && item.id === id)));
+    };
+
+    const handleDeleteChecklist = async (id) => { //Deletes checklist from Database.
+        await fetch(`http://localhost:5000/checklists/delete/${id}`, { method: 'DELETE' });
+        setData(prev => prev.filter(item => !(item.type === 'checklist' && item.id === id)));
     };
 
     const renderCards = () => { //Populates Homepage with Cards for Note & Checklists.
@@ -85,6 +91,8 @@ function Homepage() {
         }
 
         return data.map((d) => {
+            console.log(d);
+            
             const key = `${d.type}-${d.id ?? index}`;
             return d.type === "note" ? (
                 <NoteCard
@@ -93,6 +101,7 @@ function Homepage() {
                     id={d.id}
                     title={d.title}
                     onInfoClick={() => handleInfoClick(d)}
+                    onDeleteClick={handleDeleteNote}
                 />
             ) : (
                 <ChecklistCard
@@ -103,7 +112,8 @@ function Homepage() {
                     updated_at={d.updated_at}
                     items={d.items}
                     onInfoClick={() => handleInfoClick(d)}
-                    onClick={openEditChecklist} // <<< Important!
+                    onClick={openEditChecklist}
+                    onDeleteClick={handleDeleteChecklist}
                 />
             );
         });

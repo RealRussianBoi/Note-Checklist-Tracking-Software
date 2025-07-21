@@ -12,6 +12,7 @@ import {
     Box,
 } from "@mui/material";
 import InfoIcon from '@mui/icons-material/Info';
+import DeleteIcon from '@mui/icons-material/Delete';
 import ChecklistIcon from '@mui/icons-material/Checklist';
 
 function ChecklistCard({
@@ -22,7 +23,9 @@ function ChecklistCard({
     items,
     onInfoClick,
     onClick,
+    onDeleteClick,
 }) {
+  const complete = items.some((v) => v.checked !== 0) ? "Complete" : "Incomplete";
   return (
     <Card
       onClick={() => onClick({ id, title, items, created_at, updated_at, type: 'checklist' })}
@@ -34,12 +37,28 @@ function ChecklistCard({
         color: "#acb414ff",
         display: "flex",
         flexDirection: "column",
+        position: 'relative', // for positioning the trash icon
         justifyContent: "space-between",
         "&:hover": {
           backgroundColor: "#f0f8ff",
         },
       }}
     >
+      <IconButton
+        onClick={(e) => {
+          e.stopPropagation();
+          onDeleteClick(id);
+        }}
+        sx={{
+          position: 'absolute',
+          top: 4,
+          right: 4,
+          zIndex: 1,
+        }}
+      >
+        <DeleteIcon />
+      </IconButton>
+
       {/* Centered Notes Icon */}
       <CardHeader
         sx={{
@@ -52,6 +71,7 @@ function ChecklistCard({
           <ChecklistIcon sx={{ fontSize: 36, color: "#acb414ff" }} />
         }
         title={<><Typography variant="subtitle2">Type: Checklist</Typography></>}
+        subheader={<><Typography variant="caption" color="#acb414ff">Status: {complete}</Typography></>}
       />
 
       {/* Title Content */}
@@ -116,6 +136,7 @@ ChecklistCard.propTypes = {
   })).isRequired,
   onInfoClick: PropTypes.func.isRequired,
   onClick: PropTypes.func.isRequired,
+  onDeleteClick: PropTypes.func.isRequired,
 };
 
 
