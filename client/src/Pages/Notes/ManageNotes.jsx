@@ -1,6 +1,7 @@
 // General Use Imports
 import PropTypes from 'prop-types';
 import { useEffect, useState, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 // Editor.js Imports
 import EditorJS from '@editorjs/editorjs';
@@ -19,17 +20,31 @@ import {
 } from '@mui/material';
 
 //Custom Components
+import LoadingAndFinalizationAlert from '../../Components/LoadingAndFinalizationAlert';
 import FinalizationDialog from '../../Components/FinalizationDialog';
 
-function ManageNotes({ content, pageType = "Add" }) {
+function ManageNotes({ pageType = "Add" }) {
   const editorRef = useRef(null);
   const editorInstance = useRef(null);
+
+  const [searchParams] = useSearchParams();
+  const noteId = searchParams.get('id');
+
+  const [content, setContent] = useState('');
 
   const [title, setTitle] = useState('');
   const [note, setNote] = useState(null);
 
   const [titleError, setTitleError] = useState('');
   const [noteError, setNoteError] = useState('');
+
+  const [finalizationController, setFinalizationController] = useState({
+    visible: pageType !== "Add",
+    disableFields: pageType !== "Add",
+    loading: true,
+    severity: 'error',
+    finalResultText: 'ss',
+  });
 
   const [finalDialog, setFinalDialog] = useState({
     open: false,
@@ -45,7 +60,7 @@ function ManageNotes({ content, pageType = "Add" }) {
     Transition: Slide,
   });
 
-  useEffect(() => {
+  useEffect(() => { //Creates Editor Instance.
     if (!editorInstance.current) {
       editorInstance.current = new EditorJS({
         holder: editorRef.current,
@@ -55,7 +70,7 @@ function ManageNotes({ content, pageType = "Add" }) {
           list: List,
         },
         placeholder: 'Write something here...',
-        data: content ? JSON.parse(content) : undefined,
+        data: content ? content : undefined,
         onChange: async () => {
           const v = await editorInstance.current.save();
           console.log(v);
@@ -70,6 +85,43 @@ function ManageNotes({ content, pageType = "Add" }) {
         editorInstance.current = null;
       }
     };
+  }, [pageType, content]);
+
+  useEffect(() => { //Fetch note during Edit pageType.
+    const fetchData = async () => {
+      if (pageType === "Edit") {
+        try {
+          const response = await fetch(`http://localhost:5000/notes/get/${noteId}`);
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || 'Failed to fetch note.');
+          }
+
+          const parsedContent = JSON.parse(data.content);
+
+          console.log(parsedContent);
+          
+          setTitle(data.title);
+          setNote(parsedContent);
+          setContent(parsedContent);
+
+          setFinalizationController((prev) => ({...prev, visible: false, disableFields: false, }));
+        } catch (error) {
+          setFinalizationController({
+            visible: true,
+            disableFields: true,
+            loading: false,
+            severity: 'error',
+            finalResultText: `${error.message}`,
+          });
+        }
+      }
+    };
+
+    setTimeout(() => { //Sets a timeout for prettier loading animations.
+      fetchData();
+    }, 500);
   }, []);
 
   useEffect(() => { //Triggers snackbar when an error is found.
@@ -139,7 +191,7 @@ function ManageNotes({ content, pageType = "Add" }) {
         const response = await fetch(`http://localhost:5000/notes/${pageType.toLowerCase()}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, content: savedContent }),
+          body: JSON.stringify({ id: noteId, title, content: savedContent }),
         });
 
         if (response.ok) {
@@ -194,7 +246,7 @@ function ManageNotes({ content, pageType = "Add" }) {
         }}
       >
         <Typography variant='h5' fontWeight={"bold"}>
-          {pageType === "Add" ? "Add Note" : "Save Note"}
+          {pageType === "Add" ? "Adding Note" : "Updating Note"}
         </Typography>
 
         <TextField
@@ -202,6 +254,7 @@ function ManageNotes({ content, pageType = "Add" }) {
           label='Enter Title Here'
           value={title}
           onChange={(e) => updateTitle(e.target.value)}
+          disabled={finalizationController.disableFields}
           error={!!titleError}
           helperText={titleError || `${title.length}/200`}
           slotProps={{ htmlInput: { maxLength: 200 } }}
@@ -215,6 +268,7 @@ function ManageNotes({ content, pageType = "Add" }) {
             variant='contained'
             color='secondary'
             onClick={onSubmit}
+            disabled={finalizationController.disableFields}
             sx={{ minWidth: 120 }}
           >
             Save
@@ -224,6 +278,7 @@ function ManageNotes({ content, pageType = "Add" }) {
             variant='contained'
             color='primary'
             href='/home'
+            disabled={finalizationController.disableFields}
             sx={{ minWidth: 80 }}
           >
             Cancel
@@ -231,8 +286,16 @@ function ManageNotes({ content, pageType = "Add" }) {
         </div>
       </div>
 
+      <LoadingAndFinalizationAlert
+          visible={finalizationController.visible}
+          loading={finalizationController.loading}
+          severity={finalizationController.severity}
+          finalResultText={finalizationController.finalResultText}
+      />
+
       <div
         ref={editorRef}
+        hidden={finalizationController.disableFields}
         style={{
           border: '1px solid #ccc',
           borderRadius: '8px',
@@ -282,7 +345,6 @@ function ManageNotes({ content, pageType = "Add" }) {
 }
 
 ManageNotes.propTypes = {
-  content: PropTypes.string,
   pageType: PropTypes.oneOf(["Add", "Edit"]).isRequired,
 };
 

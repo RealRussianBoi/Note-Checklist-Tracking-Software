@@ -26,7 +26,9 @@ function App() {
       >
         <Routes>
           <Route path="/home" element={ <Homepage />} />
-          <Route path="/notes/add" element={ <ManageNotes />} />
+
+          <Route path="/notes/add" element={ <ManageNotes pageType="Add"/>} />
+          <Route path="/notes/edit" element={ <ManageNotes pageType="Edit"/>} />
 
           {/* Redirects all unknown URL's to this page. */}
           <Route path="*" element={ <UnkownURL />} />

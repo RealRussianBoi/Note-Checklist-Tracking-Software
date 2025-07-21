@@ -2,7 +2,7 @@
 import { Card, Typography, Box, CardActionArea } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 
-function NewNote() {
+function EmptyCard() {
   return (
     <Card
       sx={{
@@ -12,15 +12,12 @@ function NewNote() {
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
-        cursor: "pointer",
-        border: "2px dashed #1976d2",
-        color: "#1976d2",
-        "&:hover": {
-          backgroundColor: "#f0f8ff",
-        },
+        border: "2px dashed #374049ff",
+        backgroundColor: 'lightgray',
+        cursor: 'auto'
       }}
     >
-      <CardActionArea
+      {/* <CardActionArea
         sx={{
           width: '100%',
           height: '100%',
@@ -28,15 +25,13 @@ function NewNote() {
           flexDirection: 'column',
           justifyContent: 'center'
         }}
-        onClick={() => {window.location.href='/notes/add'}}
       >
-        <AddIcon sx={{ fontSize: 48 }} />
-        <Typography variant="subtitle1" fontWeight="bold">
-          Create New Note
+        <Typography variant="subtitle1" fontWeight="bold" textAlign={'center'}>
+          Future Notes & Checklists will appear here!
         </Typography>
-      </CardActionArea>
+      </CardActionArea> */}
     </Card>
   );
 }
 
-export default NewNote;
+export default EmptyCard;

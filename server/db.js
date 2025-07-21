@@ -9,8 +9,8 @@ db.run(`
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
     content TEXT,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+    created_at TEXT,
+    updated_at TEXT
   )
 `);
 
@@ -19,7 +19,8 @@ db.run(`
   CREATE TABLE IF NOT EXISTS checklist (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    created_at TEXT,
+    updated_at TEXT
   )
 `);
 

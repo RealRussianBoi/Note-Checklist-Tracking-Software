@@ -2,7 +2,7 @@
 import { Card, Typography, Box, CardActionArea } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 
-function NewChecklist() {
+function NewNote() {
   return (
     <Card
       sx={{
@@ -28,15 +28,15 @@ function NewChecklist() {
           flexDirection: 'column',
           justifyContent: 'center'
         }}
-        onClick={() => {window.location.href='/checklists/add'}}
+        onClick={() => {window.location.href='/notes/add'}}
       >
         <AddIcon sx={{ fontSize: 48 }} />
-        <Typography variant="subtitle1" fontWeight="bold">
-          Create New Checklist
+        <Typography variant="subtitle1" fontWeight="bold" textAlign={'center'}>
+          Create New Note
         </Typography>
       </CardActionArea>
     </Card>
   );
 }
 
-export default NewChecklist;
+export default NewNote;
