@@ -10,6 +10,8 @@ import List from '@editorjs/list';
 
 // MUI Imports
 import {
+  Grid,
+  Box,
   Button,
   Typography,
   TextField,
@@ -145,14 +147,8 @@ function ManageNotes({ pageType = "Add" }) {
   };
 
   const updateNotes = (v) => { //Updates note and noteError hooks.
-    setNote(v);    
-
-    if (!v || !Array.isArray(v.blocks) || v.blocks.length === 0) {
-      setNoteError("Note content is required");
-      return;
-    }
-
-    setNoteError('');
+    setNote(v);
+    setNoteError('');    
   };
 
   const onSubmit = async () => { //Ssaves Notes to batabase.
@@ -226,13 +222,13 @@ function ManageNotes({ pageType = "Add" }) {
   };
 
   return (
-    <div className='universal-page-styles' style={{ padding: '20px', paddingTop: '0px', marginTop: '45px' }}>
+    <div className='universal-page-styles' style={{ padding: '20px', paddingTop: '0px', marginTop: '45px', boxSizing: 'border-box', }}>
       <div
         style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          position: 'sticky',
+          position: {sm: 'static', md: 'sticky'},
           top: '65px',
           border: '1px dotted black',
           borderTop: 'none',
@@ -243,45 +239,69 @@ function ManageNotes({ pageType = "Add" }) {
           zIndex: 10,
         }}
       >
-        <Typography variant='h5' fontWeight={"bold"}>
-          {pageType === "Add" ? "Adding Note" : "Updating Note"}
-        </Typography>
+        <Grid
+          container
+          columnSpacing={2}
+          rowSpacing={2}
+          sx={{ mt: 2, width: '100%' }}
+          justifyContent='center'
+          alignItems={'center'}
+        >
+          {/* Title Text */}
+          <Grid size={{ xs: 12, md: 2.5, }}>
+            <Typography variant="h5" fontWeight="bold" textAlign={{xs: 'center', md: 'start'}}>
+              {pageType === "Add" ? "Adding Note" : "Updating Note"}
+            </Typography>
+          </Grid>
 
-        <TextField
-          variant='standard'
-          label='Enter Title Here'
-          value={title}
-          onChange={(e) => updateTitle(e.target.value)}
-          disabled={finalizationController.disableFields}
-          error={!!titleError}
-          helperText={titleError || `${title.length}/200`}
-          slotProps={{ htmlInput: { maxLength: 200 } }}
-          sx={{
-            width: '50%'
-          }}
-        />
+          {/* Title Input */}
+          <Grid size={{ xs: 12, md: 5, }}>
+            <TextField
+              variant="standard"
+              label="Enter Title Here"
+              value={title}
+              onChange={(e) => updateTitle(e.target.value)}
+              disabled={finalizationController.disableFields}
+              error={!!titleError}
+              helperText={titleError || `${title.length}/200`}
+              slotProps={{ htmlInput: { maxLength: 200 } }}
+              fullWidth
+            />
+          </Grid>
 
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <Button
-            variant='contained'
-            color='secondary'
-            onClick={onSubmit}
-            disabled={finalizationController.disableFields}
-            sx={{ minWidth: 120 }}
-          >
-            Save
-          </Button>
+          {/* Buttons */}
+          <Grid size={{ xs: 12, md: 3.5, }}>
+            <Box
+              sx={{
+                display: 'flex',
+                width: '100%',
+                justifyContent: { xs: 'center', md: 'flex-end' },
+                alignItems: 'center', // Not alignContent
+                gap: '10px',
+              }}
+            >
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={onSubmit}
+                disabled={finalizationController.disableFields}
+                sx={{ minWidth: 120 }}
+              >
+                Save
+              </Button>
 
-          <Button
-            variant='contained'
-            color='primary'
-            href='/home'
-            disabled={finalizationController.disableFields}
-            sx={{ minWidth: 80 }}
-          >
-            Cancel
-          </Button>
-        </div>
+              <Button
+                variant="contained"
+                color="primary"
+                href="/home"
+                disabled={finalizationController.disableFields}
+                sx={{ minWidth: 80 }}
+              >
+                Cancel
+              </Button>
+            </Box>
+          </Grid>
+        </Grid>
       </div>
 
       <LoadingAndFinalizationAlert
@@ -301,6 +321,7 @@ function ManageNotes({ pageType = "Add" }) {
           minHeight: '300px',
           overflow: 'auto',
           backgroundColor: 'white',
+          boxSizing: 'border-box',
         }}
       />
 
