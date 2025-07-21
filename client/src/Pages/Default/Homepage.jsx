@@ -91,8 +91,6 @@ function Homepage() {
         }
 
         return data.map((d) => {
-            console.log(d);
-            
             const key = `${d.type}-${d.id ?? index}`;
             return d.type === "note" ? (
                 <NoteCard

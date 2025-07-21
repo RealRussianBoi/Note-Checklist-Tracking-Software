@@ -34,8 +34,7 @@ function UpperNavBar() {
 
             <div style={{ display: 'flex', gap: '20px', fontSize: '16px' }}>
                 <a href="/home" style={{ color: 'white', textDecoration: 'none' }}>Home</a>
-                <a href="/checklist" style={{ color: 'white', textDecoration: 'none' }}>Checklist</a>
-                <a href="/notes" style={{ color: 'white', textDecoration: 'none' }}>Notes</a>
+                <a href="/notes/add" style={{ color: 'white', textDecoration: 'none' }}>Notes</a>
             </div>
         </div>
     );
