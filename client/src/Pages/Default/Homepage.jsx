@@ -1,6 +1,9 @@
 //General Use Imports
 import { useEffect, useState, } from 'react'
 
+//MUI Imports
+import { TextField } from '@mui/material';
+
 //Custom Components
 import NewNote from '../../Components/Cards/Notes/NewNote';
 import NewChecklist from '../../Components/Cards/Checklists/NewChecklist';
@@ -28,6 +31,8 @@ function Homepage() {
         open: false,
         content: null,
     });
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filteredData, setFilteredData] = useState([]);
 
     useEffect(() => { //Fetches notes and checklists to populate Homepage.
         const fetchData = async () => {
@@ -38,6 +43,9 @@ function Homepage() {
                 if (!response.ok) {
                 throw new Error(data.error || 'Unknown server error');
                 }
+
+                console.log(data);
+                
 
                 setData(data.data);
                 setFinalizationController((prev) => ({...prev, visible: false, disableFields: false, }));
@@ -57,6 +65,30 @@ function Homepage() {
             fetchData();
         }, 500);
     }, []);
+
+    useEffect(() => {
+        if (!searchTerm.trim()) {
+            setFilteredData(data);
+            return;
+        }
+
+        const term = searchTerm.toLowerCase();
+
+        const score = (item) => {
+            let total = 0;
+            if (item.title?.toLowerCase().includes(term)) total += 2;
+            if (item.content?.toLowerCase().includes(term)) total += 1;
+            if (item.items?.some(i => i.content?.toLowerCase().includes(term))) total += 1;
+            return total;
+        };
+
+        const ranked = data
+            .map(item => ({ ...item, relevance: score(item) }))
+            .filter(item => item.relevance > 0)
+            .sort((a, b) => b.relevance - a.relevance);
+
+        setFilteredData(ranked);
+    }, [searchTerm, data]);
 
     const handleInfoClick = (noteData) => { //Opens the CardInfoDialog component.
         setInfoDialog({
@@ -90,7 +122,7 @@ function Homepage() {
             );
         }
 
-        return data.map((d) => {
+        return filteredData.map((d) => {
             const key = `${d.type}-${d.id ?? index}`;
             return d.type === "note" ? (
                 <NoteCard
@@ -149,6 +181,15 @@ function Homepage() {
                 loading={finalizationController.loading}
                 severity={finalizationController.severity}
                 finalResultText={finalizationController.finalResultText}
+            />
+
+            <TextField
+                label="Search notes or checklists"
+                variant="outlined"
+                fullWidth
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                sx={{ mb: 2 }}
             />
 
             {infoDialog.data && (

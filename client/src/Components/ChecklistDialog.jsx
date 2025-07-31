@@ -142,6 +142,7 @@ function ChecklistDialog({ open, onClose, onSubmit, content }) {
             setTimeout(() => {
                 handleCancel();
             }, 1000);
+            location.reload();
         } catch (error) {
             console.error('Checklist creation failed:', error.message);
             setErrors(prev => ({
