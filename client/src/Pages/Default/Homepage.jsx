@@ -128,6 +128,7 @@ function Homepage() {
                 <NoteCard
                     key={key}
                     created_at={d.created_at}
+                    updated_at={d.updated_at}
                     id={d.id}
                     title={d.title}
                     onInfoClick={() => handleInfoClick(d)}

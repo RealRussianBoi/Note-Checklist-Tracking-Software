@@ -16,6 +16,7 @@ import NotesIcon from '@mui/icons-material/TextSnippet';
 
 function NoteCard({
   created_at,
+  updated_at,
   id,
   title,
   onInfoClick,
@@ -96,14 +97,14 @@ function NoteCard({
         }}
       >
         <Typography variant="subtitle2">
-          Created At: {new Intl.DateTimeFormat('en-US', {
+          Updated At: {new Intl.DateTimeFormat('en-US', {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
             hour: 'numeric',
             minute: '2-digit',
             hour12: true,
-          }).format(new Date(created_at))}
+          }).format(new Date(updated_at))}
         </Typography>
 
         <IconButton
