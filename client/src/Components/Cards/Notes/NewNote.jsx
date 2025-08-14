@@ -1,6 +1,7 @@
 //MUI Imports
 import { Card, Typography, Box, CardActionArea } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import { Link as RouterLink } from "react-router-dom";
 
 function NewNote() {
   return (
@@ -21,6 +22,8 @@ function NewNote() {
       }}
     >
       <CardActionArea
+        component={RouterLink}
+        to="/notes/add"
         sx={{
           width: '100%',
           height: '100%',
@@ -28,7 +31,6 @@ function NewNote() {
           flexDirection: 'column',
           justifyContent: 'center'
         }}
-        onClick={() => {window.location.href='/notes/add'}}
       >
         <AddIcon sx={{ fontSize: 48 }} />
         <Typography variant="subtitle1" fontWeight="bold" textAlign={'center'}>

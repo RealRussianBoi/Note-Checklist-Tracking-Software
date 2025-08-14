@@ -1,7 +1,7 @@
 // General Use Imports
 import PropTypes from 'prop-types';
 import { useEffect, useState, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate, Link as RouterLink } from 'react-router-dom';
 
 // Editor.js Imports
 import EditorJS from '@editorjs/editorjs';
@@ -21,19 +21,19 @@ import {
   Slide,
 } from '@mui/material';
 
-//Custom Components
+// Custom Components
 import LoadingAndFinalizationAlert from '../../Components/LoadingAndFinalizationAlert';
 import FinalizationDialog from '../../Components/FinalizationDialog';
 
-function ManageNotes({ pageType = "Add" }) {
+function ManageNotes({ pageType = 'Add' }) {
   const editorRef = useRef(null);
   const editorInstance = useRef(null);
 
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const noteId = searchParams.get('id');
 
   const [content, setContent] = useState('');
-
   const [title, setTitle] = useState('');
   const [note, setNote] = useState(null);
 
@@ -41,8 +41,8 @@ function ManageNotes({ pageType = "Add" }) {
   const [noteError, setNoteError] = useState('');
 
   const [finalizationController, setFinalizationController] = useState({
-    visible: pageType !== "Add",
-    disableFields: pageType !== "Add",
+    visible: pageType !== 'Add',
+    disableFields: pageType !== 'Add',
     loading: true,
     severity: 'error',
     finalResultText: 'ss',
@@ -58,11 +58,12 @@ function ManageNotes({ pageType = "Add" }) {
     open: false,
     vertical: 'bottom',
     horizontal: 'center',
-    text: "",
+    text: '',
     Transition: Slide,
   });
 
-  useEffect(() => { //Creates Editor Instance.
+  useEffect(() => {
+    // Creates Editor Instance.
     if (!editorInstance.current) {
       editorInstance.current = new EditorJS({
         holder: editorRef.current,
@@ -75,7 +76,6 @@ function ManageNotes({ pageType = "Add" }) {
         data: content ? content : undefined,
         onChange: async () => {
           const v = await editorInstance.current.save();
-          console.log(v);
           updateNotes(v);
         },
       });
@@ -89,9 +89,10 @@ function ManageNotes({ pageType = "Add" }) {
     };
   }, [pageType, content]);
 
-  useEffect(() => { //Fetch note during Edit pageType.
+  useEffect(() => {
+    // Fetch note during Edit pageType.
     const fetchData = async () => {
-      if (pageType === "Edit") {
+      if (pageType === 'Edit') {
         try {
           const response = await fetch(`http://localhost:5000/notes/get/${noteId}`);
           const data = await response.json();
@@ -102,13 +103,15 @@ function ManageNotes({ pageType = "Add" }) {
 
           const parsedContent = JSON.parse(data.content);
 
-          console.log(parsedContent);
-          
           setTitle(data.title);
           setNote(parsedContent);
           setContent(parsedContent);
 
-          setFinalizationController((prev) => ({...prev, visible: false, disableFields: false, }));
+          setFinalizationController((prev) => ({
+            ...prev,
+            visible: false,
+            disableFields: false,
+          }));
         } catch (error) {
           setFinalizationController({
             visible: true,
@@ -121,40 +124,39 @@ function ManageNotes({ pageType = "Add" }) {
       }
     };
 
-    setTimeout(() => { //Sets a timeout for prettier loading animations.
+    // Sets a timeout for prettier loading animations.
+    setTimeout(() => {
       fetchData();
     }, 500);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => { //Triggers snackbar when an error is found.
+  useEffect(() => {
+    // Triggers snackbar when an error is found.
     const bool = titleError || noteError;
-
     setSnackbarState((p) => ({
       ...p,
       open: bool,
     }));
   }, [titleError, noteError]);
 
-  const updateTitle = (v) => { //Updates title and titleError hooks.
+  const updateTitle = (v) => {
     setTitle(v);
-
-    if (v == '') {
-      setTitleError("Title is required");
+    if (v === '') {
+      setTitleError('Title is required');
       return;
     }
-
     setTitleError('');
   };
 
-  const updateNotes = (v) => { //Updates note and noteError hooks.
+  const updateNotes = (v) => {
     setNote(v);
-    setNoteError('');    
+    setNoteError('');
   };
 
-  const onSubmit = async () => { //Ssaves Notes to batabase.
+  const onSubmit = async () => {
+    // Saves Notes to database.
     let valid = true;
 
-    // Validation checks
     if (!title.trim()) {
       setTitleError('Title is required');
       valid = false;
@@ -175,60 +177,66 @@ function ManageNotes({ pageType = "Add" }) {
 
     const submission = async () => {
       try {
-        setFinalDialog({
-          ...finalDialog, 
-          open: true, 
-          severity: 'info', 
-          loadingText: `Saving Notes...`,
-        });
-        
-        const response = await fetch(`http://localhost:5000/notes/${pageType.toLowerCase()}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: noteId, title, content: savedContent }),
-        });
+        setFinalDialog((prev) => ({
+          ...prev,
+          open: true,
+          severity: 'info',
+          loadingText: 'Saving Notes...',
+        }));
+
+        const response = await fetch(
+          `http://localhost:5000/notes/${pageType.toLowerCase()}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: noteId, title, content: savedContent }),
+          }
+        );
 
         if (response.ok) {
-          setFinalDialog({
-            ...finalDialog, 
-            open: true, 
-            severity: "success", 
-            severityText: `Notes saved successfully!`
-          });
+          setFinalDialog((prev) => ({
+            ...prev,
+            open: true,
+            severity: 'success',
+            severityText: 'Notes saved successfully!',
+          }));
           setTimeout(() => {
-            window.location.href = '/home';
+            // ✅ Router navigation (works with HashRouter)
+            navigate('/home', { replace: true });
           }, 1000);
         } else {
-          setFinalDialog({
-            ...finalDialog,
+          setFinalDialog((prev) => ({
+            ...prev,
             open: true,
-            severity: "error",
-            severityText: `Failed to save notes.`,
-          });
+            severity: 'error',
+            severityText: 'Failed to save notes.',
+          }));
         }
       } catch (error) {
         console.error(error.message);
-        
-        setFinalDialog({
-          ...finalDialog,
+        setFinalDialog((prev) => ({
+          ...prev,
           open: true,
-          severity: "error",
-          severityText: `Failed to save notes.`,
-        });
+          severity: 'error',
+          severityText: 'Failed to save notes.',
+        }));
       }
-    }
+    };
 
-     submission();
+    submission();
   };
 
   return (
-    <div className='universal-page-styles' style={{ padding: '20px', paddingTop: '0px', marginTop: '45px', boxSizing: 'border-box', }}>
+    <div
+      className="universal-page-styles"
+      style={{ padding: '20px', paddingTop: '0px', marginTop: '45px', boxSizing: 'border-box' }}
+    >
       <div
         style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          position: {sm: 'static', md: 'sticky'},
+          position: { sm: 'static', md: 'sticky' },
           top: '65px',
           border: '1px dotted black',
           borderTop: 'none',
@@ -244,18 +252,18 @@ function ManageNotes({ pageType = "Add" }) {
           columnSpacing={2}
           rowSpacing={2}
           sx={{ mt: 2, width: '100%' }}
-          justifyContent='center'
+          justifyContent="center"
           alignItems={'center'}
         >
           {/* Title Text */}
-          <Grid size={{ xs: 12, md: 2.5, }}>
-            <Typography variant="h5" fontWeight="bold" textAlign={{xs: 'center', md: 'start'}}>
-              {pageType === "Add" ? "Adding Note" : "Updating Note"}
+          <Grid size={{ xs: 12, md: 2.5 }}>
+            <Typography variant="h5" fontWeight="bold" textAlign={{ xs: 'center', md: 'start' }}>
+              {pageType === 'Add' ? 'Adding Note' : 'Updating Note'}
             </Typography>
           </Grid>
 
           {/* Title Input */}
-          <Grid size={{ xs: 12, md: 5, }}>
+          <Grid size={{ xs: 12, md: 5 }}>
             <TextField
               variant="standard"
               label="Enter Title Here"
@@ -270,13 +278,13 @@ function ManageNotes({ pageType = "Add" }) {
           </Grid>
 
           {/* Buttons */}
-          <Grid size={{ xs: 12, md: 3.5, }}>
+          <Grid size={{ xs: 12, md: 3.5 }}>
             <Box
               sx={{
                 display: 'flex',
                 width: '100%',
                 justifyContent: { xs: 'center', md: 'flex-end' },
-                alignItems: 'center', // Not alignContent
+                alignItems: 'center',
                 gap: '10px',
               }}
             >
@@ -293,8 +301,8 @@ function ManageNotes({ pageType = "Add" }) {
               <Button
                 variant="contained"
                 color="primary"
-                href="/home"
-                disabled={finalizationController.disableFields}
+                component={RouterLink}
+                to="/home"
                 sx={{ minWidth: 80 }}
               >
                 Cancel
@@ -305,10 +313,10 @@ function ManageNotes({ pageType = "Add" }) {
       </div>
 
       <LoadingAndFinalizationAlert
-          visible={finalizationController.visible}
-          loading={finalizationController.loading}
-          severity={finalizationController.severity}
-          finalResultText={finalizationController.finalResultText}
+        visible={finalizationController.visible}
+        loading={finalizationController.loading}
+        severity={finalizationController.severity}
+        finalResultText={finalizationController.finalResultText}
       />
 
       <div
@@ -331,7 +339,7 @@ function ManageNotes({ pageType = "Add" }) {
         </FormHelperText>
       )}
 
-      <FinalizationDialog 
+      <FinalizationDialog
         onClose={() => setFinalDialog((prev) => ({ ...prev, open: false }))}
         open={finalDialog.open}
         loadingResultText={finalDialog.loadingText}
@@ -343,28 +351,25 @@ function ManageNotes({ pageType = "Add" }) {
         anchorOrigin={{ vertical: snackbarState.vertical, horizontal: snackbarState.horizontal }}
         open={snackbarState.open}
         onClose={(event, reason) => {
-          if (reason !== "backdropClick" && reason !== "escapeKeyDown") {
+          if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') {
             return;
           }
         }}
         message={snackbarState.text}
       >
-        <Alert
-          severity='error'
-        >
+        <Alert severity="error">
           <ul style={{ margin: 0, paddingLeft: '1.2em' }}>
             {titleError && <li>{titleError}</li>}
             {noteError && <li>{noteError}</li>}
           </ul>
         </Alert>
       </Snackbar>
-
     </div>
   );
 }
 
 ManageNotes.propTypes = {
-  pageType: PropTypes.oneOf(["Add", "Edit"]).isRequired,
+  pageType: PropTypes.oneOf(['Add', 'Edit']).isRequired,
 };
 
 export default ManageNotes;

@@ -1,5 +1,6 @@
 // General Use Imports
 import PropTypes from "prop-types";
+import { useNavigate } from "react-router-dom";
 
 // MUI Imports
 import {
@@ -22,9 +23,11 @@ function NoteCard({
   onInfoClick,
   onDeleteClick,
 }) {
+  const navigate = useNavigate();
+
   return (
     <Card
-      onClick={() => {window.location.href=`/notes/edit?id=${id}`}}
+      onClick={() => { navigate(`/notes/edit?id=${id}`); }}
       sx={{
         width: 250,
         height: 180,
@@ -33,11 +36,9 @@ function NoteCard({
         color: "#1976d2",
         display: "flex",
         flexDirection: "column",
-        position: 'relative', // for positioning the trash icon
+        position: 'relative',
         justifyContent: "space-between",
-        "&:hover": {
-          backgroundColor: "#f0f8ff",
-        },
+        "&:hover": { backgroundColor: "#f0f8ff" },
       }}
     >
       <IconButton
@@ -45,31 +46,17 @@ function NoteCard({
           e.stopPropagation();
           onDeleteClick(id);
         }}
-        sx={{
-          position: 'absolute',
-          top: 4,
-          right: 4,
-          zIndex: 1,
-        }}
+        sx={{ position: 'absolute', top: 4, right: 4, zIndex: 1 }}
       >
         <DeleteIcon />
       </IconButton>
 
-      {/* Centered Notes Icon */}
       <CardHeader
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          paddingBottom: 0,
-        }}
-        avatar={
-          <NotesIcon sx={{ fontSize: 36, color: "#1976d2" }} />
-        }
+        sx={{ display: "flex", justifyContent: "center", alignItems: "center", paddingBottom: 0 }}
+        avatar={<NotesIcon sx={{ fontSize: 36, color: "#1976d2" }} />}
         title={<><Typography variant="subtitle2">Type: Note</Typography></>}
       />
 
-      {/* Title Content */}
       <CardContent
         sx={{
           paddingTop: 1,
@@ -79,23 +66,12 @@ function NoteCard({
           justifyContent: 'center',
         }}
       >
-        <Typography
-          variant="subtitle1"
-          fontWeight="bold"
-          textAlign="center"
-          noWrap
-        >
+        <Typography variant="subtitle1" fontWeight="bold" textAlign="center" noWrap>
           {title}
         </Typography>
       </CardContent>
 
-      {/* Info Icon */}
-      <CardActions
-        sx={{
-          justifyContent: "space-between",
-          paddingTop: 0,
-        }}
-      >
+      <CardActions sx={{ justifyContent: "space-between", paddingTop: 0 }}>
         <Typography variant="subtitle2">
           Updated At: {new Intl.DateTimeFormat('en-US', {
             year: 'numeric',
