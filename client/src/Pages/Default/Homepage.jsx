@@ -1,5 +1,5 @@
 //General Use Imports
-import { useEffect, useState, } from 'react'
+import { useEffect, useState } from 'react'
 
 //MUI Imports
 import { TextField } from '@mui/material';
@@ -9,224 +9,261 @@ import NewNote from '../../Components/Cards/Notes/NewNote';
 import NewChecklist from '../../Components/Cards/Checklists/NewChecklist';
 import EmptyCard from '../../Components/Cards/EmptyCard';
 import LoadingAndFinalizationAlert from '../../Components/LoadingAndFinalizationAlert';
-import NoteCard from '../../Components/Cards/Notes/NoteCard'
+import NoteCard from '../../Components/Cards/Notes/NoteCard';
 import CardInfoDialog from '../../Components/CardInfoDialog';
 import ChecklistDialog from '../../Components/ChecklistDialog';
 import ChecklistCard from '../../Components/Cards/Checklists/ChecklistCard';
 
 function Homepage() {
-    const [finalizationController, setFinalizationController] = useState({
-        visible: true,
-        disableFields: true,
-        loading: true,
-        severity: 'error',
-        finalResultText: 'ss',
-    });
-    const [data, setData] = useState([]);
-    const [infoDialog, setInfoDialog] = useState({
-        open: false,
-        data: null,
-    });
-    const [checklistDialog, setChecklistDialog] = useState({
-        open: false,
-        content: null,
-    });
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filteredData, setFilteredData] = useState([]);
+  const [finalizationController, setFinalizationController] = useState({
+    visible: true,
+    disableFields: true,
+    loading: true,
+    severity: 'error',
+    finalResultText: 'ss',
+  });
+  const [data, setData] = useState([]);
+  const [infoDialog, setInfoDialog] = useState({
+    open: false,
+    data: null,
+  });
+  const [checklistDialog, setChecklistDialog] = useState({
+    open: false,
+    content: null,
+  });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredData, setFilteredData] = useState([]);
 
-    useEffect(() => { //Fetches notes and checklists to populate Homepage.
-        const fetchData = async () => {
-            try {
-                const response = await fetch('http://localhost:5000/combined/get');
-                const data = await response.json();
+  useEffect(() => { // Fetches notes and checklists to populate Homepage.
+    const fetchData = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/combined/get');
+        const data = await response.json();
 
-                if (!response.ok) {
-                throw new Error(data.error || 'Unknown server error');
-                }
-
-                console.log(data);
-                
-
-                setData(data.data);
-                setFinalizationController((prev) => ({...prev, visible: false, disableFields: false, }));
-            } catch (error) {
-                setFinalizationController({
-                    visible: true,
-                    disableFields: true,
-                    loading: false,
-                    severity: 'error',
-                    finalResultText: `${error.message}`,
-                });
-            }
-        };
-        
-        //This timeout is to make the loading animation visible. Otherwise it will be very fast.
-        setTimeout(() => {
-            fetchData();
-        }, 500);
-    }, []);
-
-    useEffect(() => {
-        if (!searchTerm.trim()) {
-            setFilteredData(data);
-            return;
+        if (!response.ok) {
+          throw new Error(data.error || 'Unknown server error');
         }
 
-        const term = searchTerm.toLowerCase();
+        console.log(data);
 
-        const score = (item) => {
-            let total = 0;
-            if (item.title?.toLowerCase().includes(term)) total += 2;
-            if (item.content?.toLowerCase().includes(term)) total += 1;
-            if (item.items?.some(i => i.content?.toLowerCase().includes(term))) total += 1;
-            return total;
-        };
-
-        const ranked = data
-            .map(item => ({ ...item, relevance: score(item) }))
-            .filter(item => item.relevance > 0)
-            .sort((a, b) => b.relevance - a.relevance);
-
-        setFilteredData(ranked);
-    }, [searchTerm, data]);
-
-    const handleInfoClick = (noteData) => { //Opens the CardInfoDialog component.
-        setInfoDialog({
-            open: true,
-            data: noteData,
+        setData(data.data);
+        setFinalizationController((prev) => ({
+          ...prev,
+          visible: false,
+          disableFields: false,
+        }));
+      } catch (error) {
+        setFinalizationController({
+          visible: true,
+          disableFields: true,
+          loading: false,
+          severity: 'error',
+          finalResultText: `${error.message}`,
         });
+      }
     };
 
-    const handleCloseDialog = () => { //Closes the CardInfoDialog component.
-        setInfoDialog({
-            open: false,
-            data: null,
-        });
+    // This timeout is to make the loading animation visible. Otherwise it will be very fast.
+    setTimeout(() => {
+      fetchData();
+    }, 500);
+  }, []);
+
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredData(data);
+      return;
+    }
+
+    const term = searchTerm.toLowerCase();
+
+    const score = (item) => {
+      let total = 0;
+      if (item.title?.toLowerCase().includes(term)) total += 2;
+      if (item.content?.toLowerCase().includes(term)) total += 1;
+      // FIX: `content` -> `text` for checklist items
+      if (item.items?.some(i => i.text?.toLowerCase().includes(term))) total += 1;
+      return total;
     };
 
-    const handleDeleteNote = async (id) => { //Deletes note from Database.
-        await fetch(`http://localhost:5000/notes/delete/${id}`, { method: 'DELETE' });
+    const ranked = data
+      .map(item => ({ ...item, relevance: score(item) }))
+      .filter(item => item.relevance > 0)
+      .sort((a, b) => b.relevance - a.relevance);
+
+    setFilteredData(ranked);
+  }, [searchTerm, data]);
+
+  const handleInfoClick = (noteData) => { // Opens the CardInfoDialog component.
+    setInfoDialog({
+      open: true,
+      data: noteData,
+    });
+  };
+
+  const handleCloseDialog = () => { // Closes the CardInfoDialog component.
+    setInfoDialog({
+      open: false,
+      data: null,
+    });
+  };
+
+  const handleDeleteNote = async (id) => { // Deletes note from Database.
+    await fetch(`http://localhost:5000/notes/delete/${id}`, { method: 'DELETE' });
     setData(prev => prev.filter(item => !(item.type === 'note' && item.id === id)));
-    };
+  };
 
-    const handleDeleteChecklist = async (id) => { //Deletes checklist from Database.
-        await fetch(`http://localhost:5000/checklists/delete/${id}`, { method: 'DELETE' });
-        setData(prev => prev.filter(item => !(item.type === 'checklist' && item.id === id)));
-    };
+  const handleDeleteChecklist = async (id) => { // Deletes checklist from Database.
+    await fetch(`http://localhost:5000/checklists/delete/${id}`, { method: 'DELETE' });
+    setData(prev => prev.filter(item => !(item.type === 'checklist' && item.id === id)));
+  };
 
-    const renderCards = () => { //Populates Homepage with Cards for Note & Checklists.
-        
-        if (data.length === 0) {
-            return (
-                <EmptyCard/>
-            );
-        }
+  const renderCards = () => { // Populates Homepage with cards.
+    if (data.length === 0) return <EmptyCard />;
 
-        return filteredData.map((d) => {
-            const key = `${d.type}-${d.id ?? index}`;
-            return d.type === "note" ? (
-                <NoteCard
-                    key={key}
-                    created_at={d.created_at}
-                    updated_at={d.updated_at}
-                    id={d.id}
-                    title={d.title}
-                    onInfoClick={() => handleInfoClick(d)}
-                    onDeleteClick={handleDeleteNote}
-                />
-            ) : (
-                <ChecklistCard
-                    key={key}
-                    id={d.id}
-                    title={d.title}
-                    created_at={d.created_at}
-                    updated_at={d.updated_at}
-                    items={d.items}
-                    onInfoClick={() => handleInfoClick(d)}
-                    onClick={openEditChecklist}
-                    onDeleteClick={handleDeleteChecklist}
-                />
-            );
-        });
-    };
+    return filteredData.map((d) => {
+      const key = `${d.type}-${d.id}`; // FIX: no undefined index
+      return d.type === 'note' ? (
+        <NoteCard
+          key={key}
+          created_at={d.created_at}
+          updated_at={d.updated_at}
+          id={d.id}
+          title={d.title}
+          onInfoClick={() => handleInfoClick(d)}
+          onDeleteClick={handleDeleteNote}
+        />
+      ) : (
+        <ChecklistCard
+          key={key}
+          id={d.id}
+          title={d.title}
+          created_at={d.created_at}
+          updated_at={d.updated_at}
+          items={d.items}
+          onInfoClick={() => handleInfoClick(d)}
+          onClick={openEditChecklist}
+          onDeleteClick={handleDeleteChecklist}
+        />
+      );
+    });
+  };
 
-    const openNewChecklist = () => { //Opens a new checklist, displaying its items.
-        setChecklistDialog({
-            open: true,
-            content: null,
-        });
-    };
+  const openNewChecklist = () => { // Opens a new checklist, displaying its items.
+    setChecklistDialog({
+      open: true,
+      content: null,
+    });
+  };
 
-    const openEditChecklist = (checklistData) => { //Opens a checklist for editing.
-        setChecklistDialog({
-            open: true,
-            content: checklistData,
-        });
-    };
+  const openEditChecklist = (checklistData) => { // Opens a checklist for editing.
+    setChecklistDialog({
+      open: true,
+      content: checklistData,
+    });
+  };
 
-    return (
-        <div 
-            style={{ 
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '10px',
-                borderRadius: '8px',
-                padding: '20px',
-                marginTop: '45px',
-                boxSizing: 'border-box',
-                width: '100%',
-            }}
-        >
-            <LoadingAndFinalizationAlert
-                visible={finalizationController.visible}
-                loading={finalizationController.loading}
-                severity={finalizationController.severity}
-                finalResultText={finalizationController.finalResultText}
-            />
+  const handleChecklistSave = (updatedFromDialog) => { // Updates UI with new checklist.
+    const base = checklistDialog.content;
 
-            <TextField
-                label="Search notes or checklists"
-                variant="outlined"
-                fullWidth
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                sx={{ mb: 2 }}
-            />
+    if (base?.id != null) {
+      const merged = {
+        ...base,
+        ...updatedFromDialog,
+        items: (updatedFromDialog.items ?? base.items).map(i => ({
+          text: i.text ?? i.content ?? '',
+          checked: !!i.checked,
+        })),
+        updated_at: new Date().toISOString(),
+        type: 'checklist',
+      };
 
-            {infoDialog.data && (
-                <CardInfoDialog
-                    open={infoDialog.open}
-                    onClose={handleCloseDialog}
-                    type={infoDialog.data.type}
-                    created_at={infoDialog.data.created_at}
-                    updated_at={infoDialog.data.updated_at}
-                    id={infoDialog.data.id}
-                    title={infoDialog.data.title}
-                />
-            )}
+      setData(prev =>
+        prev.map(it =>
+          it.type === 'checklist' && it.id === base.id ? merged : it
+        )
+      );
+    } else {
+      const created = {
+        id: updatedFromDialog.id,
+        title: updatedFromDialog.title,
+        items: (updatedFromDialog.items || []).map(i => ({
+          text: i.text ?? i.content ?? '',
+          checked: !!i.checked,
+        })),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        type: 'checklist',
+      };
+      setData(prev => [created, ...prev]);
+    }
 
-            <ChecklistDialog
-                open={checklistDialog.open}
-                content={checklistDialog.content}
-                onClose={() => setChecklistDialog({ open: false, content: null })}
-                onSubmit={(items) => console.log("Submitted:", items)}
-            />
+    setChecklistDialog({ open: false, content: null });
+  };
 
-            <div
-                style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    flexWrap: 'wrap',
-                    gap: '10px',
-                    justifyContent: 'center'
-                }}
-            >
-                <NewNote/>
-                <NewChecklist onClick={openNewChecklist}/>
-                {renderCards()}
-            </div>
-        </div>
-    );
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px',
+        borderRadius: '8px',
+        padding: '20px',
+        marginTop: '45px',
+        boxSizing: 'border-box',
+        width: '100%',
+      }}
+    >
+      <LoadingAndFinalizationAlert
+        visible={finalizationController.visible}
+        loading={finalizationController.loading}
+        severity={finalizationController.severity}
+        finalResultText={finalizationController.finalResultText}
+      />
+
+      <TextField
+        label="Search notes or checklists"
+        variant="outlined"
+        fullWidth
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        sx={{ mb: 2 }}
+      />
+
+      {infoDialog.data && (
+        <CardInfoDialog
+          open={infoDialog.open}
+          onClose={handleCloseDialog}
+          type={infoDialog.data.type}
+          created_at={infoDialog.data.created_at}
+          updated_at={infoDialog.data.updated_at}
+          id={infoDialog.data.id}
+          title={infoDialog.data.title}
+        />
+      )}
+
+      <ChecklistDialog
+        open={checklistDialog.open}
+        content={checklistDialog.content}
+        onClose={() => setChecklistDialog({ open: false, content: null })}
+        onSubmit={handleChecklistSave}
+      />
+
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          gap: '10px',
+          justifyContent: 'center',
+        }}
+      >
+        <NewNote />
+        <NewChecklist onClick={openNewChecklist} />
+        {renderCards()}
+      </div>
+    </div>
+  );
 }
 
 export default Homepage;

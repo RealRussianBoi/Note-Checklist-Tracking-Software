@@ -16,16 +16,17 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ChecklistIcon from '@mui/icons-material/Checklist';
 
 function ChecklistCard({
-    created_at,
-    updated_at,
-    id,
-    title,
-    items,
-    onInfoClick,
-    onClick,
-    onDeleteClick,
+  created_at,
+  updated_at,
+  id,
+  title,
+  items = [],
+  onInfoClick,
+  onClick,
+  onDeleteClick,
 }) {
-  const complete = items.some((v) => v.checked !== 0) ? "Complete" : "Incomplete";
+  const allChecked = items.length > 0 && items.every(i => !!i.checked);
+  const complete = allChecked ? "Complete" : "Incomplete";
   return (
     <Card
       onClick={() => onClick({ id, title, items, created_at, updated_at, type: 'checklist' })}
